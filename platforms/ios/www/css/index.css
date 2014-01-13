@@ -1,70 +1,61 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-{
-    -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+body{
+	
 }
 
-body {
+.ui-li-event-thumb{
+	width:60px;
+	margin-top:12px;
+	margin-left:10px;
+}
+.going-check{
+	margin:7px 15px 0 20px;
+	position:relative;
+	float:right;
+}
+.buy-ticket-link{
+	float:right;
+	clear:both;
+}
+.floatR{
+	float:right;
+}
+.floatL{
+	float:left;
+}
+.relative{
+	position:relative;
+}
+.clear{
+	clear:both;
+}
+.right-event-detail{
+	
+}
+.s-font{font-size:12px;}
+
+.place-events-li{
 
 }
-
-h1 {
-    font-size:24px;
-    font-weight:normal;
-    margin:0px;
-    overflow:visible;
-    padding:0px;
-    text-align:center;
+.place-events-li-a{
+	width:100%;
+	float:left;
+	padding-top:15px !important;
+	padding-bottom:15px !important;
 }
 
-.event {
-    border-radius:4px;
-    -webkit-border-radius:4px;
-    color:#FFFFFF;
-    font-size:12px;
-    margin:0px 30px;
-    padding:2px 0px;
+.pull-loader{
+	position:relative;
+	padding-bottom:0 !important;
 }
-
-.event.listening {
-    background-color:#333333;
-    display:block;
+.pull-loader-arrow{
+	display:block;
+	margin:0 auto;
 }
-
-.event.received {
-    background-color:#4B946A;
-    display:none;
+.pull-loader-con{
+	bottom:7px;
+	margin:0 auto;
+	top:auto !important;
 }
-
-@keyframes fade {
-    from { opacity: 1.0; }
-    50% { opacity: 0.4; }
-    to { opacity: 1.0; }
-}
- 
-@-webkit-keyframes fade {
-    from { opacity: 1.0; }
-    50% { opacity: 0.4; }
-    to { opacity: 1.0; }
-}
- 
-.blink {
-    animation:fade 3000ms infinite;
-    -webkit-animation:fade 3000ms infinite;
+.pull-loader-spinner{
+	display:none;
 }

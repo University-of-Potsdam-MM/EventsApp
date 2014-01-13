@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	
+    </head>
+    <body>
+    	<div data-role="page" data-dom-cache="true" data-theme="a" id="news-view" class="app">
+        	<script type="text/javascript" src="js/news.view.js"></script>
+            <div data-role="header" data-position="fixed" data-tap-toggle="false">
+                <h1>News</h1>
+                <a href="" data-shadow="false" data-iconshadow="false" data-icon="arrow-l" data-iconpos="notext" data-rel="back" data-ajax="false">Back</a>
+            </div>
+            <div data-role="content" class="ui-content" role="main">
+
+    		</div>
+            <script type="text/html" id="news-View-template">
+				<div data-role="collapsible" data-collapsed="false">
+					<h2><%= news.News.headline %></h2>
+					<div class="news-text"><%= news.News.text %></div>
+					<br />
+					<br />
+					<div>
+						<a onclick="app.openBrowser('<%=news.News.link%>')">Auf Website lesen</a>
+					</div>
+					<div>Veröffentlicht: <%= news.News.DateString %> Uhr</div>
+				</div>
+			</script>
+        </div>
+    </body>
+</html>

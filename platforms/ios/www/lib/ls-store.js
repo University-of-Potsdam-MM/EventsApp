@@ -1,35 +1,31 @@
-var LocalStore = function(successCallback, errorCallback) {
+var LocalStore = {
 
-    this.findByName = function(searchKey, callback) {
-        var employees = JSON.parse(window.localStorage.getItem("employees"));
-        var results = employees.filter(function(element) {
-            var fullName = element.firstName + " " + element.lastName;
-            return fullName.toLowerCase().indexOf(searchKey.toLowerCase()) > -1;
-        });
-        callLater(callback, results);
-    }
-
-    this.findById = function(id, callback) {
-        var employees = JSON.parse(window.localStorage.getItem("employees"));
-        var employee = null;
-        var l = employees.length;
-        for (var i=0; i < l; i++) {
-            if (employees[i].id === id) {
-                employee = employees[i];
-                break;
-            }
-        }
-        callLater(callback, employee);
-    }
-
-    // Used to simulate async calls. This is done to provide a consistent interface with stores (like WebSqlStore)
-    // that use async data access APIs
-    var callLater = function(callback, data) {
-        if (callback) {
-            setTimeout(function() {
-                callback(data);
-            });
-        }
-    }
+	get : function(key, empty){
+		var it = localStorage.getItem(key);
+		try {
+			it = JSON.parse(it);
+		} catch (e) {}
+		if(it == undefined)
+			it = empty;
+		return it;
+	},
+	
+	set : function(key, value, itemValue){
+		if(itemValue) {
+			var k = value;
+			value = this.get(key);
+			if(!value)
+				value = {};
+			value[k] = itemValue;
+		}
+		localStorage.setItem(key, JSON.stringify(value));
+	},
+	
+	val : function(key, value) {
+		if(value)
+			localStorage.setItem(key, value);
+		else
+			localStorage.getItem(key);
+	},
 
 }

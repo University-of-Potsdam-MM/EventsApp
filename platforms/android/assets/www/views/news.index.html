@@ -1,0 +1,20 @@
+<ul id="thenewslist" class="list" data-role="listview">
+	<% var source = -1, epCount = 0, html = '', extra = '', allHtml = '', img = '';
+		_.each(news, function(n, i) {
+			var e = n.News,
+			klasse = 'entry show-all show-recent news-'+n.NewsSource.id;
+			if(e.source_id != source) {
+				source = e.source_id;
+				epCount = 0;
+				%><li class="divider show-all show-recent news-<%=news[i].NewsSource.id%>" data-role="list-divider"><%= n.NewsSource.name %></li><%
+			} 
+			epCount++;
+			%><li<%=extra%> class="<%=klasse%>">
+				<a href="news/view/<%= e.id %>"><%= e.headline %><br />
+					<span style="font-size:10px"><%= e.DateString %></span>
+				</a>
+			</li><%
+		}); %>
+</ul>
+
+

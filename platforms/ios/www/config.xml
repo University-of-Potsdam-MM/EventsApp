@@ -2,7 +2,7 @@
 <widget id="com.headkino.events" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
     <name>PotsdamEvents</name>
     <description>
-        Hello World sample application that responds to the deviceready event.
+        Shows events in Potsdam.
     </description>
     <author email="support@phonegap.com" href="http://phonegap.com">
         PhoneGap Team
@@ -47,6 +47,20 @@
     <gap:splash gap:platform="ios" height="1024" src="res/screen/ios/screen-ipad-portrait.png" width="768" />
     <gap:splash gap:platform="ios" height="768" src="res/screen/ios/screen-ipad-landscape.png" width="1024" />
     <gap:splash gap:platform="winphone" src="res/screen/windows-phone/screen-portrait.jpg" />
+	<gap:plugin name="nl.x-services.plugins.calendar" version="1.0" />
+	<feature name="InAppBrowser">
+		<param name="android-package" value="org.apache.cordova.InAppBrowser" />
+		<param name="ios-package" value="CDVInAppBrowser" />
+	</feature>
+	<feature name="Notification">
+		<param name="ios-package" value="CDVNotification" />
+		<param name="android-package" value="org.apache.cordova.dialogs.Notification" />
+	</feature>
+	<feature name="Calendar">
+        <param name="ios-package" value="Calendar" />
+		<param name="android-package" value="nl.xservices.plugins.Calendar" />
+    </feature>
     <access origin="http://127.0.0.1*" />
     <access origin="http://headkino.de*" />
+	<access origin="*" browserOnly="true"/> 
 </widget>
