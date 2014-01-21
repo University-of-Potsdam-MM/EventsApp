@@ -70,6 +70,7 @@ D:\Dropbox\htdocs\mobile\events\platforms\android\assets\www\lib\jquery.mobile.i
 D:\Dropbox\htdocs\mobile\events\platforms\android\assets\www\lib\jquery.mobile.iscrollview.css \
 D:\Dropbox\htdocs\mobile\events\platforms\android\assets\www\lib\jquery.mobile.iscrollview.js \
 D:\Dropbox\htdocs\mobile\events\platforms\android\assets\www\lib\jquery.pull-to-refresh.js \
+D:\Dropbox\htdocs\mobile\events\platforms\android\assets\www\lib\jquery.transit.js \
 D:\Dropbox\htdocs\mobile\events\platforms\android\assets\www\lib\ls-store.js \
 D:\Dropbox\htdocs\mobile\events\platforms\android\assets\www\lib\promise-debug.js \
 D:\Dropbox\htdocs\mobile\events\platforms\android\assets\www\lib\q.min.js \

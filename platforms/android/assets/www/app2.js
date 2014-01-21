@@ -1,11 +1,11 @@
 var app = new $.mvc.app();
 app.setViewType("text/x-underscore-template");
 app.controllerList = ["main", "events", "news"];
-$(document).ready(function(e) {
-    app.loadControllers(app.controllerList); 
-});
+app.loadControllers(app.controllerList); 
+
 app.ready(function(){
     $.mvc.route("events");
+	app.updateLayout();
 });
 app = $.extend(app, {
 	c : $.mvc.controller,
@@ -60,6 +60,15 @@ app = $.extend(app, {
 		} else
         	$.getJSON(this.jsonUrl + url).done(function(d){ app.requests[url] = d; q.resolve(d);});
 		return q.promise;
+	},
+	updateLayout:function(){
+		var p = $.mobile.activePage;
+		var d = $('body');
+		console.log(p);
+		var header = p.find('.ui-header');
+		var footer = p.children('.ui-footer');
+		var height = d.height() - header.outerHeight() - footer.outerHeight() - ($('.ui-content').outerHeight() - $('.ui-content').height());
+		$('head').append('<style>#'+p.attr('id')+' > .ui-content{height:'+height+'px !important;}</style>');
 	},
 	openBrowser:function(url){
 		try {

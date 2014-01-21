@@ -1,6 +1,23 @@
 body{
 	
 }
+a{
+	text-decoration:none;
+}
+.ui-navbar .ui-btn{
+	line-height:25px;
+}
+
+.ui-header a.left-btn{
+	position:absolute;
+	left:8px;
+	top:8px;
+}
+.ui-header a.right-btn{
+	position:absolute;
+	right:8px;
+	top:8px;
+}
 
 li .event-thumb{
 	width:60px;

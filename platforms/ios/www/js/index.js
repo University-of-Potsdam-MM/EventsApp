@@ -109,7 +109,10 @@ var app = {
 	
 	get: function(url){
 		var q = Q.defer();
-        $.getJSON(this.jsonUrl + url).done(function(d){ app.requests[url] = d; q.resolve(d);});
+		if(app.requests[url]) {
+			q.resolve(app.requests[url]);
+		} else
+        	$.getJSON(this.jsonUrl + url).done(function(d){ app.requests[url] = d; q.resolve(d);});
 		return q.promise;
 	},                        
     

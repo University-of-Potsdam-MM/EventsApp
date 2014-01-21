@@ -982,18 +982,18 @@ html .ui-body-a a:visited,
 html body .ui-group-theme-a a:visited {
     color: #3388cc /*{a-link-visited}*/;
 }
-.ui-page-theme-a a:hover,
+/*.ui-page-theme-a a:hover,
 html .ui-bar-a a:hover,
 html .ui-body-a a:hover,
 html body .ui-group-theme-a a:hover {
-	color: #005599 /*{a-link-hover}*/;
-}
-.ui-page-theme-a a:active,
+	color: #005599 {a-link-hover};
+}*/
+/*.ui-page-theme-a a:active,
 html .ui-bar-a a:active,
 html .ui-body-a a:active,
 html body .ui-group-theme-a a:active {
-	color: #005599 /*{a-link-active}*/;
-}
+	color: #005599 /*{a-link-active};
+}*/
 /* Button up */
 .ui-page-theme-a .ui-btn,
 html .ui-bar-a .ui-btn,
@@ -1011,28 +1011,28 @@ html head + body .ui-btn.ui-btn-a:visited {
 	color: 					#333 /*{a-bup-color}*/;
 	text-shadow: 0 /*{a-bup-shadow-x}*/ 1px /*{a-bup-shadow-y}*/ 0 /*{a-bup-shadow-radius}*/ #f3f3f3 /*{a-bup-shadow-color}*/;
 }
-/* Button hover */
+/* Button hover 
 .ui-page-theme-a .ui-btn:hover,
 html .ui-bar-a .ui-btn:hover,
 html .ui-body-a .ui-btn:hover,
 html body .ui-group-theme-a .ui-btn:hover,
 html head + body .ui-btn.ui-btn-a:hover {
-	background: 			#ededed /*{a-bhover-background-color}*/;
-	border-color:	 		#ddd /*{a-bhover-border}*/;
-	color: 					#333 /*{a-bhover-color}*/;
-	text-shadow: 0 /*{a-bhover-shadow-x}*/ 1px /*{a-bhover-shadow-y}*/ 0 /*{a-bhover-shadow-radius}*/ #f3f3f3 /*{a-bhover-shadow-color}*/;
-}
+	background: 			f6f6f6 /*#ededed ;
+	border-color:	 		#ddd ;
+	color: 					#333 ;
+	text-shadow: 0  1px  0  #f3f3f3 ;
+}*/
 /* Button down */
-.ui-page-theme-a .ui-btn:active,
+/*.ui-page-theme-a .ui-btn:active,
 html .ui-bar-a .ui-btn:active,
 html .ui-body-a .ui-btn:active,
 html body .ui-group-theme-a .ui-btn:active,
 html head + body .ui-btn.ui-btn-a:active {
-	background: 			#e8e8e8 /*{a-bdown-background-color}*/;
-	border-color:	 		#ddd /*{a-bdown-border}*/;
-	color: 					#333 /*{a-bdown-color}*/;
-	text-shadow: 0 /*{a-bdown-shadow-x}*/ 1px /*{a-bdown-shadow-y}*/ 0 /*{a-bdown-shadow-radius}*/ #f3f3f3 /*{a-bdown-shadow-color}*/;
-}
+	background: 			#e8e8e8 ;
+	border-color:	 		#ddd ;
+	color: 					#333 ;
+	text-shadow: 0  1px 0  #f3f3f3 ;
+}*/
 /* Active button */
 .ui-page-theme-a .ui-btn.ui-btn-active,
 html .ui-bar-a .ui-btn.ui-btn-active,
@@ -1144,18 +1144,18 @@ html .ui-body-b a:visited,
 html body .ui-group-theme-b a:visited {
     color: #22aadd /*{b-link-visited}*/;
 }
-.ui-page-theme-b a:hover,
+/*.ui-page-theme-b a:hover,
 html .ui-bar-b a:hover,
 html .ui-body-b a:hover,
 html body .ui-group-theme-b a:hover {
-	color: #0088bb /*{b-link-hover}*/;
-}
-.ui-page-theme-b a:active,
+	color: #0088bb {b-link-hover};
+}*/
+/*.ui-page-theme-b a:active,
 html .ui-bar-b a:active,
 html .ui-body-b a:active,
 html body .ui-group-theme-b a:active {
-	color: #0088bb /*{b-link-active}*/;
-}
+	color: #0088bb /*{b-link-active};
+}*/
 /* Button up */
 .ui-page-theme-b .ui-btn,
 html .ui-bar-b .ui-btn,
@@ -1173,28 +1173,28 @@ html head + body .ui-btn.ui-btn-b:visited {
 	color: 					#fff /*{b-bup-color}*/;
 	text-shadow: 0 /*{b-bup-shadow-x}*/ 1px /*{b-bup-shadow-y}*/ 0 /*{b-bup-shadow-radius}*/ #111 /*{b-bup-shadow-color}*/;
 }
-/* Button hover */
+/* Button hover 
 .ui-page-theme-b .ui-btn:hover,
 html .ui-bar-b .ui-btn:hover,
 html .ui-body-b .ui-btn:hover,
 html body .ui-group-theme-b .ui-btn:hover,
 html head + body .ui-btn.ui-btn-b:hover {
-	background: 			#373737 /*{b-bhover-background-color}*/;
-	border-color:	 		#1f1f1f /*{b-bhover-border}*/;
-	color: 					#fff /*{b-bhover-color}*/;
-	text-shadow: 0 /*{b-bhover-shadow-x}*/ 1px /*{b-bhover-shadow-y}*/ 0 /*{b-bhover-shadow-radius}*/ #111 /*{b-bhover-shadow-color}*/;
-}
+	background: 			#373737 {b-bhover-background-color};
+	border-color:	 		#1f1f1f {b-bhover-border};
+	color: 					#fff {b-bhover-color};
+	text-shadow: 0 {b-bhover-shadow-x} 1px {b-bhover-shadow-y} 0 {b-bhover-shadow-radius} #111 {b-bhover-shadow-color};
+}*/
 /* Button down */
-.ui-page-theme-b .ui-btn:active,
+/*.ui-page-theme-b .ui-btn:active,
 html .ui-bar-b .ui-btn:active,
 html .ui-body-b .ui-btn:active,
 html body .ui-group-theme-b .ui-btn:active,
 html head + body .ui-btn.ui-btn-b:active {
-	background: 			#404040 /*{b-bdown-background-color}*/;
-	border-color:	 		#1f1f1f /*{b-bdown-border}*/;
-	color: 					#fff /*{b-bdown-color}*/;
-	text-shadow: 0 /*{b-bdown-shadow-x}*/ 1px /*{b-bdown-shadow-y}*/ 0 /*{b-bdown-shadow-radius}*/ #111 /*{b-bdown-shadow-color}*/;
-}
+	background: 			#404040 ;
+	border-color:	 		#1f1f1f ;
+	color: 					#fff ;
+	text-shadow: 0  1px  0  #111 ;
+}*/
 /* Active button */
 .ui-page-theme-b .ui-btn.ui-btn-active,
 html .ui-bar-b .ui-btn.ui-btn-active,

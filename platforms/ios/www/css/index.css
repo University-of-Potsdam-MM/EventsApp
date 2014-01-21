@@ -1,11 +1,37 @@
 body{
 	
 }
+a{
+	text-decoration:none;
+}
+.ui-navbar .ui-btn{
+	line-height:35px;
+}
 
-.ui-li-event-thumb{
+.ui-header a.left-btn{
+	position:absolute;
+	left:8px;
+	top:8px;
+}
+.ui-header a.right-btn{
+	position:absolute;
+	right:8px;
+	top:8px;
+}
+
+li .event-thumb{
 	width:60px;
 	margin-top:12px;
 	margin-left:10px;
+}
+li .event-time{
+	font-size:10px;
+}
+li .event-title{
+	width:100%;
+	float:left;
+	text-overflow: ellipsis;
+	overflow:hidden;
 }
 .going-check{
 	margin:7px 15px 0 20px;
@@ -58,4 +84,7 @@ body{
 }
 .pull-loader-spinner{
 	display:none;
+}
+.fullWidth{
+	width:100%;
 }
