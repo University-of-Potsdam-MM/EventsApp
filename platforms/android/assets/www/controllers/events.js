@@ -1,26 +1,33 @@
-$.mvc.controller.create("events", {
+app.controllers.events = BackboneMVC.Controller.extend({
     name: 'events',
 	places: false,
-	views:["views/events.index.html","views/events.view.html","views/events.set_locations.html","views/events.place.html"], //These are the views we will use with the controller
+	views:["views/events.index","views/events.view","views/events.set_locations","views/events.place"], //These are the views we will use with the controller
 	
     view:function(id){
 		var self = this;
-		app.loadPage(this.name, 'view', 'events/view/' + id).done(function(d){
-			self.currentEvent = d.vars.event;
+		app.loadPage(this.name, 'view', 'events/view/' + id, {going:LocalStore.get('going', {})}).done(function(d){
+			if(d)
+				self.currentEvent = d.vars.event;
+			app.activeCon().scrollTop(0);
 		});
     },
 	
     init:function(){
        //$.ui.scrollingDivs['events-index'].addPullToRefresh();
+	   this.going = LocalStore.get('going');
 	   this.disabledLocations = LocalStore.get('disabledLocations', {});
     },
 	
-    default:function(){
+    index:function(filter){
 		var self = this;
-		app.loadPage(this.name, 'index', 'events').done(function(d){
+		this.filter = filter;
+		app.loadPage(this.name, 'index', 'events', {going:LocalStore.get('going', {})}).done(function(d){
+			if(!d) return;
 			self.places = d.vars.places;
 			self.filterIndex();
 			self.setActiveBtn();
+			//self.stickListDividers();
+			self.addPullToRefresh();
 		});
     },
 	
@@ -31,14 +38,23 @@ $.mvc.controller.create("events", {
 	},
 	
 	set_locations: function(){
-		if(this.places)
-			app.loadPage(this.name, 'set_locations', {places:this.places});
+		if(this.places) {
+			app.loadPage(this.name, 'set_locations', {places:this.places, disabledLocations:this.disabledLocations}).done(function(){
+				track('events/set_locations');
+			});
+		} else {
+			app.route('events/index');
+		}
 	},
 	
-	filter:'next',
+	filter:'',
 	filterIndex: function(w){
-		if(!w)
+		if(!this.filter)
+			this.filter = 'next';
+		if(!w) {
 			w = this.filter;
+		} else
+			track('events/filter/'+w);
 		var lstr = '', lim = '';
 		for(var i in this.disabledLocations) {
 			lstr += lim + 'li.location-'+i;
@@ -48,27 +64,51 @@ $.mvc.controller.create("events", {
 		//$('#thelist > li').not(lstr).css('display', 'block');
 		$('#thelist').children('li').css('display', 'none');
 		$('#thelist').children('li.show-'+w).not(lstr).css('display', 'block');
-		app.filter = w;
+		$('#thelist').trigger('resize');
+		$('#thelist').trigger('resize');
+		this.filter = w;
 		this.setActiveBtn();
+		window.setTimeout(function(){$(window).trigger('resize');}, 10);
 	},
 	
-	toggleLocation: function(){
+	addPullToRefresh:function(){
+		app.activeCon().pullToRefresh({
+			refresh: function (callback) {
+				app.refresh(callback);//.done(callback);
+			}
+		});
+	},
+	
+	stickListDividers: function(){
+		return;
+		$('body').stacks({
+			body: '.ui-content', // This is the container that will house your floating element.
+			title: '.up-divider', // The identifier for the elements you want to be fixed, can be any type of jQuery selector
+			margin: 0,
+			offset: 0,
+			fixAndroid: $.os.android,
+			touch: $.os.ios,
+			fixiOS: $.os.ios
+		})
+	},
+	
+	toggleLocation: function(it){
 		var elements = $('#locationlist').find('.ch-location');
 		this.disabledLocations = {};
+		track('location/toggle/'+$(it).data('id')+'/'+it.checked);
 		var self = this;
 		elements.each(function(i, el) {
 			if(!el.checked)
 				self.disabledLocations[$(el).data('id')] = $(el).data('id');
 		});
 		LocalStore.set('disabledLocations', this.disabledLocations);
-		console.log(this.disabledLocations);
-		this.filterIndex();
+		//this.filterIndex();
 	},
 	
 	setActiveBtn:function(){
 		var klasse = 'ui-btn-active';
 		$('.btn-filter-events.'+klasse).removeClass(klasse);
-		$('#btn-'+this.filter+'-events').addClass(klasse);
+		$('#btn-'+this.filter+'-events', app.footer).addClass(klasse);
 	},
 	
 	saveToCalendar:function(){
@@ -83,11 +123,13 @@ $.mvc.controller.create("events", {
 				LocalStore.set('going', e.Event.id, e.Event.id);
 				$('#savedInCal'+e.Event.id).show();
 				saved = true;
+				track('events/calendar/'+e.Event.id+'/saved');
 			},
 			function(m){
 				if(m != 'User cancelled')
 				navigator.notification.alert("Das Event konnte nicht in deinem Kalender gespeichert werden. Bitte überprüfe in den Einstellungen ob du der App den Zugriff auf deinen Kalender erlaubst.", null, 'Fehler');
 				saved = false;
+				track('events/calendar/'+e.Event.id+'/canceled');
 			}
 		);
 	},

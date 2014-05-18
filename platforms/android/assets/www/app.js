@@ -1,342 +1,280 @@
-var app = {
-	controllerList:["main", "events", "news"],
+requirejs.config({
+    //By default load any module IDs from js/lib
+    baseUrl: 'lib',
+    //except, if the module ID starts with "app",
+    //load it from the js/app directory. paths
+    //config is relative to the baseUrl, and
+    //never includes a ".js" extension since
+    //the paths config could be for a directory.
+    paths: {
+        views: '../views',
+		controllers: '../controllers'
+    }
+});
+
+var AppRouter = BackboneMVC.Router.extend({
+	before:function(route){
+		window.backDetected = true; //wird komischerweise nur ausgeführt, wenn zurücknavigiert wird. Und genau dafür sollte diese Funktion da sein.
+	}
+});
+
+
+app = {
+	c: {}, //Controller array
+	controllers: {}, //Controllerklassen
+	controllerList: ["controllers/main", "controllers/events", "controllers/news"],
+	viewType:"text/x-underscore-template",
+	requests : [],
+	cacheTimes: [],
+	serverUrl: 'http://headkino.de/potsdamevents/',
 	jsonUrl: 'http://headkino.de/potsdamevents/json/',
-    backUrl: 'events/index',
-	links : {},
-	disabledLocations : {},
-	filter : 'next',
-	defaultController : 'events',
 	going : {},
-	ids: {},
-	requests: {},
-	tapLocked:0,
-    // Application Constructor
-    initialize: function() {
-		this.loadControllers();
-        this.bindEvents();
-    },
-	
-	onPageLoad : function(){
-		var q = Q.defer();
-		if(app.afterLoad) {
-			app.afterLoad().done(q.resolve);
-			delete app.afterLoad;
-		} else q.resolve();
-		return q.promise;
-	},
-    // Bind Event Listeners
-    //
-    // Bind any events that are required on startup. Common events are:
-    // 'load', 'deviceready', 'offline', and 'online'.
-    bindEvents: function() {
-        document.addEventListener('deviceready', this.onDeviceReady, false);
-        this.detailsURL = /events\/view\/(\d+)/
-		//$(window).on('hashchange', $.proxy(this.route, this));
-		$(document).on('tap', 'a[data-href]', app.tapped);
-		$( document ).on( "orientationchange", function( event ) {
-			alert( "This device is in " + event.orientation + " mode!" );
+	testcode: '',
+	viewFileExt: 'js',
+	router : new AppRouter(),
+	init: function(){
+		this.testcode = LocalStore.get('testcode', (Date.now()+'').substr(-4));
+		this.baseUrl = document.location.pathname;
+		this.baseUrl = this.baseUrl.replace(/\/index\.html/, '');
+		var that = this;
+		$(document).one('app:controllersLoaded', function(){
+			that.updateLayout();
+			that.bindEvents();
+			Backbone.history.start({pushState: false, root: that.baseUrl});
+			if(!window.location.hash) {
+				that.route("main/menu");
+			} else {
+				app.history.push(Backbone.history.fragment);
+			}
 		});
-        //$(document).on('pageload', app.onPageLoad);
-		$(window).on('navigate', function(e, data){
-			app.setActiveBtn();
-		});
-		testLive();
-        //$('a').on('click', this.go);
-        //app.receivedEvent('thelist');
-    },
-	initLayout: function(){
-		var p = $.mobile.activePage;
-		var d = $('body');
-		console.log(p);
-		var header = p.find('.ui-header');
-		var footer = p.children('.ui-footer');
-		var height = d.height() - header.outerHeight() - footer.outerHeight() - ($('.ui-content').outerHeight() - $('.ui-content').height());
-		$('head').append('<style>#'+p.attr('id')+' > .ui-content{height:'+height+'px !important;}</style>');
+		this.loadControllers(app.controllerList);
 	},
-    // deviceready Event Handler
-    //
-    // The scope of 'this' is the event. In order to call the 'receivedEvent'
-    // function, we must explicity call 'app.receivedEvent(...);'
-    onDeviceReady: function() {
-		if(window.device)
-			alert(window.device.platform)
-		app.going = LocalStore.get('going', {});
-        Q(app.get('events')).then(function(d){app.render('index', d)}).done(app.initLayout);
-    },
-	
-	route: function(url, refreshing) {
-        if(!url) return;
-		var d = url.split('/');
-		var controller = d[0], action = d[1];
-		if(!controller)
-			controller = app.defaultController;
-		if(!action)
-			action = 'index';
-		if(controller == app.defaultController) {
-			var cls = '';
-		} else {
-			action = controller + '.' + action;
-			var cls = controller;
+	history:[],
+	route:function(url, noTrigger){
+		//console.log(app.c);
+		var trigger = !noTrigger;
+		if(trigger)
+			this.history.push(url);
+		this.router.navigate(url, {trigger: trigger, replace: false});
+	},
+	refresh:function(callback){
+		var url = Backbone.history.fragment;
+		this.refreshing = true;
+		this.setCallback(callback);
+		this.route(url);
+	},
+	previous: function(noTrigger){
+		if(this.history[this.history.length - 2]) {
+			this.history.pop();
+			this.route(this.history[this.history.length - 1], noTrigger);
 		}
-		var pageID = cls+'-'+action;
-		var transition = 'slide';
-		app.afterLoad = function(){
-			var q = Q.defer();
-			//alert(app.ids[pageID] + ' - ' +url);
-			if(app.ids[pageID] == url && !refreshing) {
-				q.resolve();
-				return q.promise;
-			}
-			if(app.requests[url] && !refreshing) {
-				app.render(action, app.requests[url]);
-				q.resolve();
-				return q.promise;
-			}
-			Q(app.get(url)).then(function(d){app.render(action, d)}).then(q.resolve);
+	},
+	callback : function(){},
+	setCallback:function(callback){
+		var self = this;
+		this.callback = function(){
+			callback(arguments);
+			self.callback = function(){};
+		}
+	},
+	render : function(view, d, con){
+		var t = this.template('views/'+view);
+		if(d && d.vars)
+			d = d.vars;
+		var temp = _.template(t);
+		//console.log(d);
+		return temp(d);
+	},
+	loadPage: function(c, a, url, transition){
+		var q = Q.defer();
+		if(this.locked) {
+			q.resolve();
 			return q.promise;
 		}
-		var filename = window.location.pathname;
-		Q($.mobile.loadPage( action + '.html' ))
-			.then(app.onPageLoad)
-			.then(function(){
-				if(filename.indexOf(action + '.html') < 0)
-					$.mobile.changePage(action + ".html",{allowSamePageTransition:true,reloadPage:false,changeHash:true,transition:transition})
-			}).done(function(){
-				app.lockTap(-1);
+		this.locked = true;
+		var params = {};
+		if(typeof(transition) == 'object') {
+			params = transition;
+			transition = false;
+		}
+
+		if(!transition)
+			transition = 'slide';
+
+		var b = transition[0], back;
+		if(back = b == '-') {
+			transition = transition.substr(1);
+		}
+		if(window.backDetected) {
+			back = true;
+			window.backDetected = false;
+		}
+		window.reverseTransition = back;
+		var self = this; var samePage = false;
+		var callback = function(d){
+			//console.log($.mobile.activePage.data('appfunction')+' '+c+'.'+a);
+			if($.mobile.activePage.data('appfunction') == c+'.'+a) {
 				$.mobile.activePage.data('appurl', url);
-				app.ids[pageID] = url;
+				app.locked = false;
+				q.resolve(d);
+				samePage = true;
+			}
+			var vars = d ? (d.vars ? $.extend(true, {}, d.vars) :$.extend(true, {}, d)) : {};
+			$.extend(vars, params);
+			//console.log(vars);
+			var html = app.render(c+'.'+a, vars); 
+			var $con = $('.ui-content', '#'+c+'-'+a);
+			//var footer = $('.footer', '#'+c+'-'+a);
+			if(self.refreshing) {
+				$con.append(html);
+				self.callback();
+			} else {
+				$con[0].innerHTML = html;
+			}
+			$con.enhanceWithin();
+			
+			self.refreshing = false;
+			if(samePage) {
+				app.locked = false;
+				return;
+			}
+			//$.mobile.pageContainer.change will be needed in future versions
+			Q($.mobile.changePage('#'+c+'-'+a,{allowSamePageTransition:true,reloadPage:false,changeHash:true,transition:transition, reverse:back}))
+			.then(function(){
+				$.mobile.activePage.data('appurl', url);
+				$.mobile.activePage.data('appfunction', c+'.'+a);
+				$('a:hover').blur(); //Damit die Hover Class des gedrückten Buttons entfernt wird Focus genrell clearen
+				app.locked = false;
+				q.resolve(d);
 			});
-        return false;
-	},
+		}
 	
+		if(url && url != null && typeof(url) == 'string')
+			app.get(url).done(callback);
+		else
+			callback(url);
+		return q.promise;
+	},
 	get: function(url){
 		var q = Q.defer();
-		if(app.requests[url]) {
+		//app.requests[url] = testData; q.resolve(app.requests[url]); return q.promise;
+		//if(this.refreshing) {for(var i = 0; i < 1000; i++){};}
+		if(app.requests[url] && !this.refreshing && app.cacheTimes[url] && Date.now() - app.cacheTimes[url] < 5 * 3600000) { //Alle 5 Stunden wird aktualisiert
+			track(url);
 			q.resolve(app.requests[url]);
-		} else
-        	$.getJSON(this.jsonUrl + url).done(function(d){ app.requests[url] = d; q.resolve(d);});
+		} else {
+        	$.getJSON(this.jsonUrl + url + '?testcode='+this.testcode).done(function(d){ app.requests[url] = d; app.cacheTimes[url] = Date.now(); q.resolve(d);});
+		}
 		return q.promise;
-	},                        
-    
-	lockTap: function(value, now){
-		if(value > 0) {
-			app.tapLocked += value;
-			if(app.tapLockTimer) {
-				window.clearTimeout(app.tapLockTimer);
-				app.tapLocked--;
-			}
-			app.tapLockTimer = window.setTimeout(function(){
-				app.tapLockTimer = false;
-				app.lockTap(-1, true);
-			}, 500);
-		} else {
-			app.tapLocked += value;
-			if(app.tapLocked < 0)
-				app.tapLocked = 0;	
-		}
 	},
-	
-    tapped : function(){
-		if(app.tapLocked)
+	updateLayout:function(){
+		if(!this.header) {
+			this.body = $('#wrapper');
+			this.header = $('#the_header');
+			this.headerContent = $('#header-content');
+			this.footerContent = $('#footer-content');
+			this.footer = $('#the_footer');
+			this.footerHeight = this.footer.height();
+			//$('head').append('<style id="layout-style-css"> .ui-content{height:'+height+'px !important;}</style>');
+			this.layoutCSS = $('#layout-style-css');
+			var self = this;
+			$(window).resize(function(){
+				self.contentOuter = $('.ui-content').outerHeight() - $('.ui-content').height();
+				self.updateLayout();
+			});
+			if($.os.ios7)
+				this.header.addClass('ios7');
+			$(window).resize();
 			return;
-		app.lockTap(2);
-        var url = $(this).data('href');
-		var old = $.mobile.activePage.data('appurl');
-		if(old != url) {
-        	app.route(url, true);
 		}
-		else {
-			var p = $(this).parents('.ui-panel');
-			if(p.length) {
-				p.panel("close");
-			}
-			app.lockTap(-1);
-		}
-    },
-	
-	refresh:function(url){
-		app.route(url, true);
+		var hheight = this.header.is(':visible') * this.header.outerHeight(true);
+		var fheight = (this.footer.is(':visible')) * this.footer.outerHeight(true);
+		if(window.footerAnimating) fheight = 1;
+		var height = this.body.height() - hheight - fheight - this.contentOuter + 3;
+		this.layoutCSS.html('.ui-content{height:'+height+'px !important;} .app-page{padding-top:'+(hheight - 1)+'px !important;}');
 	},
-	
-	render: function(v, d){
-		if(v.indexOf('.') > -1) {
-			var controller = app[v.split('.')[0]], c = v.split('.')[0] + '-';
-			v = v.split('.')[1];
-		} else {
-			var controller = app, c = '';
-		}
-		var V = v[0].toUpperCase() + v.slice(1);
-		if(controller['render' + V ])
-			controller['render' + V ](d);
-		var $temp = $('#'+ c + V + '-template'); 
-		if($temp.length) {
-			d = d.vars;
-			var temp = _.template($temp.html());
-			$('.ui-content', '#' + c + v).html(temp(d));
-		}
-		if(controller['after' + V ])
-			controller['after' + V ](d);
-	},
-	
-	renderIndex: function(d){
-		console.log('renderIndex');
-		d = d.vars;
-		var parentElement = document.getElementById('thelist');
-		this.disabledLocations = LocalStore.get('disabledLocations', {});
-		this.going = LocalStore.get('going', {});
-		var place = -1, epCount = 0, html = '', extra = '', allHtml = '', img = '', going = '';
-		parentElement.innerHTML = '';//'<li class="show-next show-all show-today pull-loader"><div class="pull-loader-con"><img class="pull-loader-spinner" src="img/spinner.gif" alt="" /><img class="pull-loader-arrow" src="img/pullarrow.png" alt="" /></div></li>';
-		for(var i in d.events) {
-			var e = d.events[i].Event,
-			klasse = 'entry show-all location-'+d.events[i].Place.id;
-			if(e.place_id != place) {
-				place = e.place_id;
-				epCount = 0;
-				html = '<li class="divider place-events-li show-all show-next show-today location-'+d.events[i].Place.id+'" data-role="list-divider"><a class="place-events-li-a ui-btn-icon-right ui-icon-carat-r" data-href="events/place/'+d.events[i].Place.id+'">' + d.events[i].Place.name + '</a></li>';
-			} else html = '';
-			epCount++;
-			if(epCount < 4) {
-				klasse += ' show-next';
-				extra = '';
-			} else
-				extra = ' style="display:none" ';
-			if(date('d.m.Y') == date('d.m.Y', e.startTime))
-				klasse += ' show-today';
-			img = e.pic_square ? '<img class="ui-li-event-thumb" src="'+ e.pic_square + '" />' : '';
-			going = this.going[e.id] ? '<br /><span class="relative floatL">Vorgemerkt</span>' : '';
-			html += '<li'+extra+' class="'+klasse+'"><a data-href="events/view/'+ e.id + '">'+ img + e.name + '<br /><span style="font-size:10px">' + e.DateString + going + '</span></a></li>';
-			//alert(e.name);
-			//alert(html);
-			allHtml += html;
-		}
-		parentElement.innerHTML += allHtml;
-		$(parentElement).listview('refresh');
-		
-		var locationList = document.getElementById('locationlist');
-		if(locationList.dataset.init) 
-			return;
-		allHtml = '';
-		for(var i in d.places) {
-			var checked = !this.disabledLocations[i] ? ' checked="checked"' : '';
-			html = '<input type="checkbox" class="ch-location" onchange="app.toggleLocation()" data-id="'+i+'" name="location-'+i+'" id="location-'+i+'"'+checked+' /><label for="location-'+i+'">' + d.places[i] + '</label>';
-			allHtml += html;
-		}
-		locationList.innerHTML = allHtml;
-		locationList.dataset.init = true;
-		//$(locationList).controlgroup('refresh');
-	},
-	
-	afterIndex : function(){
-		$('#locationlistcontainer').page();
-		this.filterIndex();
-		var timer, lockScroll = true, touched = false;
-		/*var $uiContent = $('.ui-content');
-		var $pullLoader = $('.pull-loader', $uiContent), $pullLoaderArrow = $('.pull-loader-arrow', $uiContent), $pullLoaderSpinner = $('.pull-loader-spinner', $uiContent);
-		//$pullLoader.height($(document).height());
-		var pullLimit = 70, overLimit = false, limitPassed = false, deg1 = 0, deg2 = -180;
-		var pullh = ptop = 300;//screen.availHeight;
-		pullh += pullLimit - 30;
-		$pullLoader.css('padding-top', ptop);
-		//$uiContent.animate({scrollTop: (pullh)}, function(){lockScroll = false});
-		var scrolled = function(){
-			var s = $uiContent.scrollTop();
-			limitPassed = false;
-			if(s < pullh - pullLimit) {
-				if(!overLimit) {
-					limitPassed = true
-					overLimit = true;
-					deg1 = 0;
-					deg2 = -180;
-				}
-			} else {
-				if(overLimit) {
-					limitPassed = true
-					overLimit = false;
-					deg1 = -180;
-					deg2 = 0;
-				}
-			}
-			if(limitPassed)
-				$({deg: deg1}).animate({deg: deg2}, {
-					duration: 200,
-					step: function(now) {
-						$pullLoaderArrow.css({
-							transform: 'rotate(' + now + 'deg)'
-						});
-					}
-				});
-			if(lockScroll) return;
-			window.clearTimeout(timer);
-			var timerCallback = function(){
-				if( s < pullh && !touched) {
-					lockScroll = true;
-					if(s < pullh - pullLimit) {
-						$uiContent.animate({scrollTop: (pullh - pullLimit + 1)}, function(){
-							$pullLoaderArrow.hide();
-							$pullLoaderSpinner.show();
-							Q(app.refresh('events/index')).done(function(){
-								//alert(1);
-								$uiContent.animate({scrollTop: (pullh)}, function(){
-									$pullLoaderArrow.show();
-									$pullLoaderSpinner.hide();
-									lockScroll = false;
-								});
-								//lockScroll = false;
-							});
-						});
-						
-					} else {
-						//alert(3);
-						$uiContent.animate({scrollTop: (pullh)}, function(){lockScroll = false});
-					}
-				}
-			}
-			//if(!touched) timerCallback();
-			timer = window.setTimeout( timerCallback, 150 );
-		};
-		$uiContent.scroll(scrolled);
-		$uiContent[0].addEventListener( 'touchstart', function(e){ touched = true}, false );
-		$uiContent[0].addEventListener( 'touchmove', scrolled, false );
-		$uiContent[0].addEventListener( 'touchend', function(e){ e.preventDefault(); touched = false; scrolled(); }, false );
-		$uiContent.animate({scrollTop: (pullh)}, function(){lockScroll = false});*/
-	},
-	
-	toggleLocation:function(){
-		var elements = $('#locationlist').find('.ch-location');
-		app.disabledLocations = {};
-		elements.each(function(i, el) {
-			if(!el.checked)
-				app.disabledLocations[$(el).data('id')] = $(el).data('id');
+	bindEvents:function(){
+		var self = this;
+		$.ajaxSetup({
+			  "error":function() {
+				  app.locked = false;
+				  $('.ui-btn-active', app.activePage()).removeClass('ui-btn-active');
+				  app.previous(true);
+				  var s = 'Es konnte keine Verbindung zum Server hergestellt werden. Bitte überprüfe deine Internetverbindung';
+				  if(navigator.notification)
+				  	navigator.notification.alert(s, null, 'Kein Internet');
+				  else
+				  	alert(s);
+			  }
 		});
-		LocalStore.set('disabledLocations', this.disabledLocations);
-		this.filterIndex();
+		$(document).on('pagebeforechange', function(e, a){
+			var toPage = a.toPage;
+			if(typeof(a.toPage) == 'string') return;
+			var header = $('.header', toPage);
+			var footer = $('.footer', toPage);
+			if($.os.ios) {
+				var dur = 300;
+				self.headerContent.fadeOut(dur, function(){
+					self.headerContent[0].innerHTML = header[0].innerHTML;
+					self.headerContent.fadeIn(dur);
+				});
+			} else {
+				self.headerContent[0].innerHTML = header[0].innerHTML;
+			}
+			var duration = 350, animating = 'footer';
+			window.footerAnimating = true;
+			var dir = window.reverseTransition ? 1 : -1;
+			if(footer.length > 0) {
+				self.footerContent[0].innerHTML = footer[0].innerHTML;
+				self.footer[0].style.display = 'block';
+				self.footer.animate({'left':0}, duration, function(){
+					window.footerAnimating = false;
+					self.updateLayout();
+				});
+			} else { 
+				self.footer.animate({'left':(self.footer.width() * dir)+'px'}, duration, function(){
+					self.footer[0].style.display = 'none';
+					self.updateLayout();
+					window.footerAnimating = false;
+				});
+			}
+			self.updateLayout(animating);
+		});
+		$(document).on('click', 'a[data-rel="back"]', function(){
+			window.history.back();
+		});
+
+		$(document).on('click', 'a', function(e){
+			var href = $(this).attr('href');
+			var target = $(this).attr('target');
+			var mapRequest = !(href.indexOf('maps:') == -1 && href.indexOf('geo:') == -1);
+			if(href && href.indexOf('javascript:') == -1 && href.indexOf('http://') == -1 && !mapRequest) {
+				$('.ui-btn-active', app.activePage()).removeClass('ui-btn-active');
+				$(this).addClass('ui-btn-active');
+				self.route(href);
+			}
+			if(!target || target != '_system') {
+				e.preventDefault();
+			} else {
+				if(href)
+					track(href);
+			}
+		})
 	},
-	
-	filterIndex: function(w){
-		if(!w)
-			w = app.filter;
-		var lstr = '', lim = '';
-		console.log(app.disabledLocations)
-		for(var i in app.disabledLocations) {
-			lstr += lim + 'li.location-'+i;
-			lim = ',';
-		}
-		//$(lstr, '#thelist').css('display', 'none');
-		//$('#thelist > li').not(lstr).css('display', 'block');
-		$('#thelist').children('li').css('display', 'none');
-		$('#thelist').children('li.show-'+w).not(lstr).css('display', 'block');
-		app.filter = w;
-		app.setActiveBtn();
+	activePage: function(){
+		return $.mobile.activePage;
 	},
-	
-	setActiveBtn:function(){
-		//$('.btn-filter-events.ui-btn-active').removeClass('ui-state-persist');
-		$('.btn-filter-events.ui-btn-active').removeClass('ui-btn-active');
-		$('#btn-'+app.filter+'-events').addClass('ui-btn-active');
-		//$('#btn-'+app.filter+'-events').addClass('ui-state-persist');
+	activeCon:function(){
+		return $('.ui-content', this.activePage());
 	},
-	
+	getPage:function(id){
+		return $('#'+id);
+	},
+	loadingIndicator:function(){
+		
+	},
 	openBrowser:function(url){
+		track(url);
 		try {
 			//Für Android
 			var ref = navigator.app.loadUrl(url, { openExternal:true });
@@ -349,8 +287,39 @@ var app = {
 			
 		}
 	},
-	
-};
+	loadControllers: function(urls) {
+		var that = this;
+		require(urls, function(){
+			var views = [], viewNames = [], appc = [];
+			var c = 0;
+			for(var i in app.controllers) {
+				that.controllersLoaded = true;
+				app.c[i] = appc[i] = (new app.controllers[i]);
+				if(app.c[i].init)
+					app.c[i].init();
+				for(var j in appc[i].views) {
+					views[c] = 'text!'+appc[i].views[j]+'.' + that.viewFileExt;
+					viewNames[c] = appc[i].views[j];
+					c++;
+				}
+			}
+			require(views, function(data){
+				for(var c in views) {
+					var id = that.getTemplateID(viewNames[c]);
+					$('body').append($("<script type='" + that.viewType + "' id='" + id + "'>" + arguments[c] + "</script>"));
+				}
+				$(document).trigger('app:controllersLoaded');
+			});
+		});
+	},
+	getTemplateID: function(url){
+		return url.replace(/\//g, '-').replace(/\./g, '__');
+	},
+	template: function(url){
+		var id = this.getTemplateID(url);
+		return document.getElementById(id).innerHTML;
+	}
+}	
 
 function testLive(){
     var event = document.createEvent('HTMLEvents');
@@ -358,3 +327,42 @@ function testLive(){
     event.eventName = 'deviceready';
     document.dispatchEvent(event);
 }
+
+function track(action){
+	var url = app.jsonUrl+'app/track/'+app.testcode+'/?url='+encodeURI(action);
+	if(!$.os.fennec)
+		$('#tracker').attr('src', url);
+};
+
+var detectUA = function($, userAgent) {
+	$.os = {};
+	$.os.webkit = userAgent.match(/WebKit\/([\d.]+)/) ? true : false;
+	$.os.android = userAgent.match(/(Android)\s+([\d.]+)/) || userAgent.match(/Silk-Accelerated/) ? true : false;
+	$.os.androidICS = $.os.android && userAgent.match(/(Android)\s4/) ? true : false;
+	$.os.ipad = userAgent.match(/(iPad).*OS\s([\d_]+)/) ? true : false;
+	$.os.iphone = !$.os.ipad && userAgent.match(/(iPhone\sOS)\s([\d_]+)/) ? true : false;
+	$.os.ios7 = userAgent.match(/(iPhone\sOS)\s([7_]+)/) ? true : false;
+	$.os.webos = userAgent.match(/(webOS|hpwOS)[\s\/]([\d.]+)/) ? true : false;
+	$.os.touchpad = $.os.webos && userAgent.match(/TouchPad/) ? true : false;
+	$.os.ios = $.os.ipad || $.os.iphone;
+	$.os.playbook = userAgent.match(/PlayBook/) ? true : false;            
+	$.os.blackberry10 = userAgent.match(/BB10/) ? true : false;
+	$.os.blackberry = $.os.playbook || $.os.blackberry10|| userAgent.match(/BlackBerry/) ? true : false;
+	$.os.chrome = userAgent.match(/Chrome/) ? true : false;
+	$.os.opera = userAgent.match(/Opera/) ? true : false;
+	$.os.fennec = userAgent.match(/fennec/i) ? true : userAgent.match(/Firefox/) ? true : false;
+	$.os.ie = userAgent.match(/MSIE 10.0/i) ? true : false;
+	$.os.ieTouch = $.os.ie && userAgent.toLowerCase().match(/touch/i) ? true : false;
+	$.os.supportsTouch = ((window.DocumentTouch && document instanceof window.DocumentTouch) || 'ontouchstart' in window);
+	//features
+	$.feat = {};
+	var head = document.documentElement.getElementsByTagName("head")[0];
+	$.feat.nativeTouchScroll = typeof(head.style["-webkit-overflow-scrolling"]) !== "undefined" && ($.os.ios||$.os.blackberry10);
+	$.feat.cssPrefix = $.os.webkit ? "Webkit" : $.os.fennec ? "Moz" : $.os.ie ? "ms" : $.os.opera ? "O" : "";
+	$.feat.cssTransformStart = !$.os.opera ? "3d(" : "(";
+	$.feat.cssTransformEnd = !$.os.opera ? ",0)" : ")";
+	if ($.os.android && !$.os.webkit)
+		$.os.android = false;
+}
+
+	

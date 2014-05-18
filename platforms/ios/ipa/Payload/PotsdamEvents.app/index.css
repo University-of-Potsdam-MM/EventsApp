@@ -1,0 +1,130 @@
+body{
+	
+}
+a{
+	text-decoration:none;
+}
+.vorgemerkt{
+	color:#060;
+}
+.ui-navbar .ui-btn{
+	line-height:25px;
+}
+.ui-header a{
+	min-width:60px;
+	color:#FFF !important;
+	text-shadow:none !important;
+}
+.ui-header a:hover{
+	opacity:0.5;
+}
+.ui-header a.left-btn{
+	position:absolute;
+	padding:8px;
+	left:0;
+	top:0;
+}
+.ui-header a.right-btn{
+	position:absolute;
+	padding:8px;
+	right:0;
+	top:0;
+}
+.ui-header a.right-btn img{
+	float:right;
+}
+.top-btn{
+	padding:16px !important;
+}
+.ui-header.ios7{
+	padding-top:20px;
+}
+.ui-header.ios7 a.left-btn, .ui-header.ios7 a.right-btn{
+	top:22px;
+} 
+.up-divider{
+	left:0 !important;
+}
+.ui-title{
+	line-height:1.8;
+	text-shadow:none;
+	color:#FFF;
+}
+
+li .event-thumb{
+	width:60px;
+	margin-top:12px;
+	margin-left:10px;
+}
+li .event-time{
+	font-size:10px;
+}
+li .event-title{
+	width:100%;
+	float:left;
+	text-overflow: ellipsis;
+	overflow:hidden;
+}
+.going-check{
+	margin:7px 15px 0 20px;
+	position:relative;
+	float:right;
+}
+.buy-ticket-link{
+	float:right;
+	clear:both;
+}
+.floatR{
+	float:right;
+}
+.floatL{
+	float:left;
+}
+.relative{
+	position:relative;
+}
+.clear{
+	clear:both;
+}
+.right-event-detail{
+	
+}
+.s-font{font-size:12px;}
+
+.place-events-li{
+
+}
+.place-events-li-a,.source-news-li-a{
+	padding-top:20px !important;
+	padding-bottom:20px !important;
+	background-color:#eee !important;
+}
+.place-events-li-a.ui-btn-active,.source-news-li-a.ui-btn-active{
+	background-color:#104871 !important;
+	color:#FFF;
+}
+
+.pull-loader{
+	position:relative;
+	padding-bottom:0 !important;
+}
+.pull-loader-arrow{
+	display:block;
+	margin:0 auto;
+}
+.pull-loader-con{
+	bottom:7px;
+	margin:0 auto;
+	top:auto !important;
+}
+.pull-loader-spinner{
+	display:none;
+}
+.fullWidth{
+	width:100%;
+}
+
+.main-link{
+	padding-top:20px !important;
+	padding-bottom:20px !important;
+}

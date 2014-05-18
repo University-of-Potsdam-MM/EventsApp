@@ -59,10 +59,10 @@
 		ajaxEnabled: true,
 
 		// Automatically load and show pages based on location.hash
-		hashListeningEnabled: true,
+		hashListeningEnabled: false,
 
 		// disable to prevent jquery from bothering with links
-		linkBindingEnabled: true,
+		linkBindingEnabled: false,
 
 		// Set default page transition - 'none' for no transitions
 		defaultPageTransition: "fade",
@@ -2471,7 +2471,7 @@ if ( !$.support.boxShadow ) {
 			makeUrlAbsolute: function( relUrl, absUrl ) {
 				if ( !path.isRelativeUrl( relUrl ) ) {
 					return relUrl;
-				} else alert(relUrl);
+				} //else alert(relUrl);
 
 				if ( absUrl === undefined ) {
 					absUrl = this.documentBase;
@@ -2485,7 +2485,7 @@ if ( !$.support.boxShadow ) {
 					pathname = path.makePathAbsolute( relObj.pathname || absObj.filename, absObj.pathname ),
 					search = relObj.search || ( !hasPath && absObj.search ) || "",
 					hash = relObj.hash;
-				console.log(pathname);
+				//console.log(pathname);
 				return protocol + doubleSlash + authority + pathname + search + hash;
 			},
 
@@ -7873,21 +7873,21 @@ $.widget( "mobile.button", {
 		locked: false,
 		disable: function( lock ) {
 			if ( !disabledInitially && !$.mobile.zoom.locked ) {
-				meta.attr( "content", disabledZoom );
+				//meta.attr( "content", disabledZoom );
 				$.mobile.zoom.enabled = false;
 				$.mobile.zoom.locked = lock || false;
 			}
 		},
 		enable: function( unlock ) {
 			if ( !disabledInitially && ( !$.mobile.zoom.locked || unlock === true ) ) {
-				meta.attr( "content", enabledZoom );
+				//meta.attr( "content", enabledZoom );
 				$.mobile.zoom.enabled = true;
 				$.mobile.zoom.locked = false;
 			}
 		},
 		restore: function() {
 			if ( !disabledInitially ) {
-				meta.attr( "content", initialContent );
+				//meta.attr( "content", initialContent );
 				$.mobile.zoom.enabled = true;
 			}
 		}

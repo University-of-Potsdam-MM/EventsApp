@@ -1,31 +1,64 @@
 <!DOCTYPE html>
-<html>
-    <head>
+<html><head>
         <meta charset="utf-8" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
-        <link rel="stylesheet" type="text/css" href="css/index.css" />
-        <link rel="stylesheet" type="text/css" href="lib/jquery.mobile-1.4.0.css" />
-        <script type="text/javascript" src="lib/jquery-1.10.2.min.js"></script>
-        <!--<script type="text/javascript" src="lib/zepto.js"></script>-->
-		<script type="text/javascript" src="lib/jquery.mobile-1.4.0.min.js"></script>
-        <script type="text/javascript" src="lib/q.min.js"></script>
-        <script type="text/javascript" src="lib/ls-store.js"></script>
-        <script type="text/javascript" src="lib/date.js"></script>
-        <script type="text/javascript" src="lib/fastclick.js"></script>
-        <script type="text/javascript" src="lib/underscore-min.js"></script>
-        <script type="text/javascript" src="lib/af.mvc.js"></script>
-        <script type="text/javascript" src="phonegap.js"></script>
-        <script type="text/javascript" src="lib/Calendar.js"></script>
-        
-        <script type="text/javascript" src="app.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/index.css" /><!--Globaler Stylesheet-->
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.0.css" />
         <script type="text/javascript">
-        	app.detectUA($, navigator.userAgent);
-			if($.os.ios7) 
-				alert(1);
+			function debug(f){ //Funktion zum ausgeben von Debuginformationen im Header
+				$('h1:visible').html(f);
+			}
+		</script>
+        <script type="text/javascript" src="lib/jquery-1.10.2.min.js"></script>
+		<script type="text/javascript" src="lib/jquery.mobile-1.4.0.js"></script>
+        <script type="text/javascript" src="lib/q.min.js"></script>
+        <script type="text/javascript" src="lib/ls-store.js"></script><!--LocalStorage-Klasse-->
+        <script type="text/javascript" src="lib/date.js"></script><!--PHP date-Funktion in JS zur formatierten Datumsausgabe aus einem Timestamp-->
+        <script type="text/javascript" src="lib/fastclick.js"></script>
+		<script type="text/javascript" src="lib/require.js"></script>
+        <script type="text/javascript" src="lib/underscore-min.js"></script>
+        <script type="text/javascript" src="lib/backbone-min.js"></script>
+		<script type="text/javascript" src="lib/backbone.routefilter.js"></script><!--Gibt dem AppRouter die Funktion before-->
+        <script type="text/javascript" src="lib/backbone-mvc.js"></script>
+        <script type="text/javascript" src="phonegap.js"></script>
+        <script type="text/javascript" src="lib/Calendar.js"></script><!--Kalenderzugriffsplugin-->
+        
+        <script type="text/javascript" src="app.js"></script><!--app-Klasse-->
+        <script type="text/javascript">
+        	detectUA($, navigator.userAgent); //Betriebssystem bzw. Browser ermitteln
         </script>
-        <style id="layout-style-css"></style>
+        <script src="lib/jquery.pull-to-refresh.js"></script><!--Pull-To-Refresh-Plugin (Nur iOS)-->
+        <style id="layout-style-css"></style><!--Container für JS-generiertes CSS-->
         <style type="text/css">
+			/*Inhaltsbereich einer Seite*/
+			.ui-content {
+				/*Behebt Scrollingfehler unter iOS und Android*/
+				-webkit-transform: translate3d(0,0,0);
+				transform: translate3d(0, 0, 0);
+				position:relative;
+				overflow-y: scroll;
+            	-webkit-overflow-scrolling: touch;
+			}
+			.fixed {
+				position: fixed !important;
+				z-index: 500;
+			}
+			.sticky {
+				position: -webkit-sticky !important;
+				position: -ms-sticky !important;
+				position: -o-sticky !important;
+				position: sticky !important;
+				z-index: 500;
+			}
+			.absolute {
+				position: absolute !important;
+				width: 100%;
+				margin-bottom: 0;
+				z-index: 501;
+				bottom: -16px;
+				box-sizing: border-box;
+			}
 			.listview-wrapper{
 				height:100%;
 			}
@@ -34,21 +67,22 @@
 				margin: 0;
 				border:none !important;
 				overflow:hidden;
+				background:#E9E9E9;
 			}
+			/*Wrapper absolut um Androiddarstellungsfehlern vorzubeugen */
 			#wrapper{
 				position:absolute;
 				width:100%;
 				height:100%;
 			}
+			/*Globaler Seitencontainer */
 			#pages-container{
 				float:left;
-			}
-			.app-page{
-				padding-top:50px !important;
 			}
 			.app-page .ui-header,.app-page .header, .app-page .footer{
 				display:none !important;
 			}
+			/*Globaler Header Container */
 			#the_header {
 				position : fixed;
 				top      : 0;
@@ -58,8 +92,14 @@
 				z-index  : 1000;
 				overflow : hidden;
 				background:#E9E9E9;
-				border-top:none !important;
+				background:#104871;
+				border:none !important;
 			}
+			#header-content,#footer-content{
+				float:left;
+				width:100%;
+			}
+			/*Globaler Footer Container */
 			#the_footer{
 				position : fixed;
 				bottom   : 0;
@@ -68,42 +108,49 @@
 				height   : 40px;
 				z-index  : 1000;
 				overflow : hidden;
-				background:#E9E9E9;
+				background:#FFF;
 				border-bottom:none !important;
 			}
+			#the_footer a{ border:none !important; text-shadow:none !important; background:none !important; color:#999; }
+			#the_footer a.ui-btn-active{ background:none !important; color:#104871;}
 			#the_header,#the_footer{
 				border-color:#DDD;
 			}
 		</style>
         <script type="text/javascript">
-		window.addEventListener('load', function() {
-			FastClick.attach(document.body);
-		}, false);
-         $(document).ready(function () {
-            // Setting #container div as a jqm pageContainer
-            $.mobile.pageContainer = $('#pages-container');
-			$('#the_header,#the_footer').enhanceWithin();
-			//testLive();
-            // Setting default page transition to slide
-        });
+			window.addEventListener('load', function() {
+				FastClick.attach(document.body); //Fastclick einbinden
+			}, false);
+			 $(document).ready(function () {
+				$.mobile.pageContainer = $('#pages-container'); // #pages-container div als jqm-pageContainer definieren
+				$.mobile.linkBindingEnabled = false; // Prevents all anchor click handling, bringt aber hier eigentlich nichts, sondern musste direkt in der jQuery.mobile.js geändert werden
+				$.mobile.hashListeningEnabled = false; 		// Disabling this will prevent jQuery Mobile from handling hash changes, Backbone übernimmt das
+				$('#the_header,#the_footer').enhanceWithin();
+				app.init(); 	//App initialisieren
+			});
 		</script>
         <title>Potsdam Events</title>
     </head>
     <body class="ui-body-a">
     	<div id="wrapper">
+        	<!--********Header******-->
         	<div id="the_header" class="ui-header ui-bar-inherit ui-header-fixed" data-role="header" data-position="fixed" data-tap-toggle="false">
-                <h1 class="ui-title">Uni Potsdam</h1>
+                <div id="header-content">
+                	<h1 class="ui-title">Uni Potsdam</h1>
+                </div>
             </div>
+            <!--********Seitengerüstcontainer******-->
             <div id="pages-container">
-                 <!--********EVENTS******-->
+                <!--********EVENTS******-->
+                <!--********EVENTS-Index******-->
                 <div data-role="page" data-dom-cache="true" data-appUrl="events/index" data-theme="a" id="events-index" class="app-page">
                     <div class="header">
-                    <a class="ui-icon left-btn menu-btn" href="main/menu" data-shadow="false" data-iconshadow="false" data-icon="bars" data-iconpos="notext" data-ajax="false">
-                		<img src="img/menu-icon.png" height="30" width="35" alt="Menü" />
+                    <a class="ui-icon left-btn menu-btn" href="main/menu" data-shadow="false" data-iconshadow="false" data-icon="bars" data-iconpos="notext">
+                		<img src="img/menu.svg" class="glyph-menu" alt="Menü" />
                     </a>
                     <h1 class="ui-title">Veranstaltungen</h1>
-                    <a class="right-btn" href="events/set_locations" data-shadow="false" data-iconshadow="false" data-icon="gear" data-iconpos="notext" data-ajax="false">
-                        <img src="img/gears-icon.png" height="30" width="30" alt="Einstellungen" />
+                    <a class="right-btn" href="events/set_locations">
+                        <img src="img/gears.svg" class="glyph-gear" alt="Einstellungen" />
                     </a>
                     </div>
                     
@@ -112,75 +159,97 @@
                     <div class="footer">
                         <div data-role="navbar" data-tap-toggle="false">
                             <ul>
-                                <li><a class="btn-filter-events" id="btn-all-events" onClick="app.c.events.filterIndex('all')">Alle</a></li>
-                                <li><a class="btn-filter-events" id="btn-today-events" onClick="app.c.events.filterIndex('today')">Heute</a></li>
-                                <li><a class="btn-filter-events" id="btn-next-events" onClick="app.c.events.filterIndex('next')">Nächste</a></li>
+                                <li><a class="btn-filter-events" href="events/index/all" id="btn-all-events">Alle</a></li>
+                                <li><a class="btn-filter-events" href="events/index/today" id="btn-today-events">Heute</a></li>
+                                <li><a class="btn-filter-events" href="events/index/next" id="btn-next-events">Nächste</a></li>
                             </ul>
                         </div>
                     </div>
                 </div>
                 
+                <!--********EVENTS-view******-->
                 <div data-role="page" data-dom-cache="true" data-appUrl="events/view" data-theme="a" id="events-view" class="app-page">
                     <div class="header">
                         <a href="" class="left-btn" data-shadow="false" data-iconshadow="false" data-icon="arrow-l" data-iconpos="notext" data-rel="back" data-ajax="false">
-                        	<img src="img/back-button.png" height="30" width="20" alt="Zurück" />
+                        	<img src="img/back-button.svg" class="glyph-back" alt="Zurück" />
                         </a>
                         <h1 class="ui-title">Veranstaltung</h1>
                     </div>
                     <div data-role="content" class="ui-content" role="main"></div>
                 </div>
-                
+                <!--********EVENTS-place******-->
                 <div data-role="page" data-dom-cache="true" data-appUrl="events/place" data-theme="a" id="events-place" class="app-page">
                     <div class="header">
                         <a href="" class="left-btn" data-shadow="false" data-iconshadow="false" data-icon="arrow-l" data-iconpos="notext" data-rel="back" data-ajax="false">
-                        	<img src="img/back-button.png" height="30" width="20" alt="Zurück" />
+                        	<img src="img/back-button.svg" class="glyph-back" alt="Zurück" />
                         </a>
-                        <h1 class="ui-title">Veranstaltungen</h1>
+                        <h1 class="ui-title">Location</h1>
                     </div>
                     <div data-role="content" class="ui-content" role="main"></div>
                 </div>
                 
+                <!--********EVENTS-set_locations******-->
                 <div data-role="page" data-dom-cache="true" data-appUrl="events/set_locations" data-theme="a" id="events-set_locations" class="app-page">
                     <div class="header">
-                        <a href="" class="left-btn" data-shadow="false" data-iconshadow="false" data-icon="arrow-l" data-iconpos="notext" data-rel="back" data-ajax="false">Fertig</a>
+                        <a href="" class="left-btn" data-shadow="false" data-iconshadow="false" data-icon="arrow-l" data-iconpos="notext" data-rel="back" data-ajax="false">
+                        	<img src="img/back-button.svg" class="glyph-back" alt="Zurück" />
+                        </a>
                         <h1 class="ui-title">Locations</h1>
                     </div>
                     <div data-role="content" class="ui-content" role="main"></div>
                 </div>
                 
                 <!--********NEWS******-->
+                <!--********NEWS-Index******-->
                 <div data-role="page" data-dom-cache="true" data-appUrl="news/view" data-theme="a" id="news-index" class="app-page">
                     <div class="header">
                         <div class="header">
                             <a class="left-btn" href="main/menu" data-shadow="false" data-iconshadow="false" data-icon="bars" data-iconpos="notext" data-ajax="false">
-                                <img src="img/menu-icon.png" height="30" width="35" alt="Menü" />
+                                <img src="img/menu.svg" class="glyph-menu" alt="Menü" />
                             </a>
                             <h1 class="ui-title">News</h1>
                             <a class="right-btn" href="news/set_sources" data-shadow="false" data-iconshadow="false" data-icon="gear" data-iconpos="notext" data-ajax="false">
-                                <img src="img/gears-icon.png" height="30" width="30" alt="Einstellungen" />
+                                <img src="img/gears.svg" class="glyph-gear" alt="Einstellungen" />
                             </a>
                        </div>
                     </div>
                     <div data-role="content" class="ui-content" role="main"></div>
                 </div>
                 
+                <!--********NEWS-source******-->
+                <div data-role="page" data-dom-cache="true" data-appUrl="news/source" data-theme="a" id="news-source" class="app-page">
+                    <div class="header">
+                        <a class="left-btn" href="" data-shadow="false" data-iconshadow="false" data-icon="arrow-l" data-iconpos="notext" data-rel="back" data-ajax="false">
+                        	<img src="img/back-button.svg" class="glyph-back" alt="Zurück" />
+                        </a>
+                        <h1 class="ui-title">Quelle</h1>
+                    </div>
+                    <div data-role="content" class="ui-content" role="main"></div>
+                </div>      
+                
+                <!--********NEWS-view******-->
                 <div data-role="page" data-dom-cache="true" data-appUrl="news/view" data-theme="a" id="news-view" class="app-page">
                     <div class="header">
-                        <a href="" data-shadow="false" data-iconshadow="false" data-icon="arrow-l" data-iconpos="notext" data-rel="back" data-ajax="false">Zurück</a>
+                        <a class="left-btn" href="" data-shadow="false" data-iconshadow="false" data-icon="arrow-l" data-iconpos="notext" data-rel="back" data-ajax="false">
+                        	<img src="img/back-button.svg" class="glyph-back" alt="Zurück" />
+                        </a>
                         <h1 class="ui-title">News</h1>
                     </div>
                     <div data-role="content" class="ui-content" role="main"></div>
                 </div>
                 
+                <!--********NEWS-set_sources******-->
                 <div data-role="page" data-dom-cache="true" data-appUrl="news/set_sources" data-theme="a" id="news-set_sources" class="app-page">
                     <div class="header">
-                        <a href="" class="left-btn" data-shadow="false" data-iconshadow="false" data-icon="arrow-l" data-iconpos="notext" data-rel="back" data-ajax="false">Fertig</a>
+                        <a href="" class="left-btn top-btn" data-shadow="false" data-iconshadow="false" data-icon="arrow-l" data-iconpos="notext" data-rel="back" data-ajax="false">
+                        	<img src="img/back-button.svg" class="glyph-back" alt="Zurück" />
+                        </a>
                         <h1 class="ui-title">Quellen</h1>
                     </div>
                     <div data-role="content" class="ui-content" role="main"></div>
                 </div>
                 
-                 <!--********MAIN******-->
+                 <!--********MAIN-Menu******-->
                 <div data-role="page" data-dom-cache="true" data-appUrl="main" data-theme="a" id="main-menu" class="app-page">
                     <div class="header">
                         <h1 class="ui-title">Uni Potsdam</h1>
@@ -188,9 +257,12 @@
                     <div data-role="content" class="ui-content" role="main"></div>
                 </div>
             </div>
+            <!--********Footer******-->
             <div id="the_footer" class="ui-footer-fixed ui-footer" data-position="fixed" data-tap-toggle="false">
-                
+                <div id="footer-content"></div>
             </div>
         </div>
+        <!--********Unsichtbares Image um Aktionen zu tracken (Für Test)******-->
+        <img style="position:absolute; left:0; right:0" src="" id="tracker" alt="" width="1" height="1" />
     </body>
 </html>

@@ -94,9 +94,7 @@ var jq = $;
                         console.log("error ", e);
                     };
                     $("head").append(file);
-                    that._loadedListeners[urls[i]] = 1;
-                    that._loadedListeners.length++;
-                    $(document).one(urls[i] + ":ready", function(e,data) {
+                   	$(document).one(urls[i] + ":ready", function(e,data) {
                         data=data||e.data;
                         delete that._loadedListeners[data.name];
                         that._loadedListeners.length--;

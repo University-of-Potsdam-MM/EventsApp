@@ -1,6 +1,6 @@
-$.mvc.controller.create("main", {
+app.controllers.main = BackboneMVC.Controller.extend({
     name: 'main',
-	views:["views/main.menu.html"], //These are the views we will use with the controller
+	views:["views/main.menu"], //These are the views we will use with the controller
 
     init:function(){
 		
@@ -9,6 +9,7 @@ $.mvc.controller.create("main", {
     menu:function(){
 		var self = this;
 		app.loadPage(this.name, 'menu', null, '-slide');
+		track('main/menu');
     }
 	
 });
